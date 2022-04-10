@@ -1,13 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"math/cmplx"
 	"math/rand"
 	"runtime"
-
-	"github.com/go-gl/glfw/v3.3/glfw"
-	// "github.com/go-gl/gl/v3.3-core/gl"
+	// "github.com/go-gl/gl/v2.1/gl"
+	// "github.com/go-gl/glfw/v3.3/glfw"
 )
 
 func init() {
@@ -25,12 +25,12 @@ func rand_double(max float64) float64 {
 
 // TODO: need to pass roots by reference.
 
-func findroots_inner(coefs []complex128, deg int, roots []complex128) {
+func findroots_inner(coefs []complex128, deg int, roots []complex128) []complex128 {
 	var root complex128
 	if (deg == 1) {
 		root = -coefs[0] / coefs[1]
 		roots = append(roots, root)
-		return
+		return roots
 	}
 
 	var n int
@@ -61,9 +61,9 @@ func findroots_inner(coefs []complex128, deg int, roots []complex128) {
 
 		// evaluating the polynomial and its derivative at a candidate root
 		for n = 0; n < deg; n++ {
-			p *= root
 			f += p * coefs[n]
 			d += p * coefs[n+1] * complex(float64(n+1), 0)
+			p *= root
 		}
 		f += p * coefs[deg]
 		root -= f / d
@@ -82,18 +82,24 @@ func findroots_inner(coefs []complex128, deg int, roots []complex128) {
 	}
 	for n = 0; n < deg; n++ {
 		coefs[n] = coefs[n+1]
-		findroots_inner(coefs, deg-1, roots)
 	}
+	return findroots_inner(coefs, deg-1, roots)
 }
 
 func findroots(coefs []complex128, deg int) []complex128 {
-	roots := make([]complex128, deg)
-	findroots_inner(coefs, deg, roots)
+	var roots = make([]complex128, 0)
+	roots = findroots_inner(coefs, deg, roots)
 	return roots
 }
 
 func main() {
-	err := glfw.Init()
+	coefs := []complex128{complex(1, 0), complex(0, 0), complex(1, 0)}
+	deg := len(coefs) - 1
+
+	roots := findroots(coefs, deg)
+	fmt.Println(roots)
+
+	/* err := glfw.Init()
 	if err != nil {
 		panic(err)
 	}
@@ -112,5 +118,5 @@ func main() {
 		glfw.PollEvents()
 	}
 
-	// https://pkg.go.dev/github.com/go-gl/gl/v2.1/gl
+	// https://pkg.go.dev/github.com/go-gl/gl/v2.1/gl */
 }
