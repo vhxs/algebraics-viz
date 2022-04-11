@@ -1,13 +1,14 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"math"
 	"math/cmplx"
 	"math/rand"
 	"runtime"
-	// "github.com/go-gl/gl/v2.1/gl"
-	// "github.com/go-gl/glfw/v3.3/glfw"
+
+	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 func init() {
@@ -18,12 +19,11 @@ func init() {
 
 // https://www.wolfe.id.au/2020/03/10/starting-a-go-project/
 // https://commons.wikimedia.org/wiki/File:Algebraicszoom.png
+// https://kylewbanks.com/blog/tutorial-opengl-with-golang-part-1-hello-opengl
 
 func rand_double(max float64) float64 {
 	return rand.Float64() * max
 }
-
-// TODO: need to pass roots by reference.
 
 func findroots_inner(coefs []complex128, deg int, roots []complex128) []complex128 {
 	var root complex128
@@ -39,7 +39,7 @@ func findroots_inner(coefs []complex128, deg int, roots []complex128) []complex1
 	var i int = 0
 	var j int = 0
 
-	// probably Newton's method...?
+	// Newton's method
 	for {
 		if (j == 500) {
 			root = complex(rand_double(2) - 1, rand_double(2) - 1)
@@ -92,31 +92,60 @@ func findroots(coefs []complex128, deg int) []complex128 {
 	return roots
 }
 
+const width = 800
+const height = 600
+
+// initOpenGL initializes OpenGL and returns an intiialized program.
+func initOpenGL() uint32 {
+    if err := gl.Init(); err != nil {
+            panic(err)
+    }
+    version := gl.GoStr(gl.GetString(gl.VERSION))
+    log.Println("OpenGL version", version)
+
+    prog := gl.CreateProgram()
+    gl.LinkProgram(prog)
+    return prog
+}
+
+// initGlfw initializes glfw and returns a Window to use.
+func initGlfw() *glfw.Window {
+    if err := glfw.Init(); err != nil {
+            panic(err)
+    }
+    
+    glfw.WindowHint(glfw.Resizable, glfw.False)
+    glfw.WindowHint(glfw.ContextVersionMajor, 4) // OR 2
+    glfw.WindowHint(glfw.ContextVersionMinor, 1)
+    glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
+    glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
+
+    window, err := glfw.CreateWindow(width, height, "Algebraics", nil, nil)
+    if err != nil {
+            panic(err)
+    }
+    window.MakeContextCurrent()
+
+    return window
+}
+
+func draw(window *glfw.Window, program uint32) {
+    gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+    gl.UseProgram(program)
+    
+    glfw.PollEvents()
+    window.SwapBuffers()
+}
+
 func main() {
-	coefs := []complex128{complex(1, 0), complex(0, 0), complex(1, 0)}
-	deg := len(coefs) - 1
+    runtime.LockOSThread()
 
-	roots := findroots(coefs, deg)
-	fmt.Println(roots)
+    window := initGlfw()
+    defer glfw.Terminate()
+    
+    program := initOpenGL()
 
-	/* err := glfw.Init()
-	if err != nil {
-		panic(err)
-	}
-	defer glfw.Terminate()
-
-	window, err := glfw.CreateWindow(640, 480, "Testing", nil, nil)
-	if err != nil {
-		panic(err)
-	}
-
-	window.MakeContextCurrent()
-
-	for !window.ShouldClose() {
-		// Do OpenGL stuff.
-		window.SwapBuffers()
-		glfw.PollEvents()
-	}
-
-	// https://pkg.go.dev/github.com/go-gl/gl/v2.1/gl */
+    for !window.ShouldClose() {
+        draw(window, program)
+    }
 }
