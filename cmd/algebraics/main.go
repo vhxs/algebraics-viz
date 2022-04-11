@@ -21,6 +21,8 @@ func init() {
 // https://commons.wikimedia.org/wiki/File:Algebraicszoom.png
 // https://kylewbanks.com/blog/tutorial-opengl-with-golang-part-1-hello-opengl
 
+// VAO and VBO tutorial: https://www.youtube.com/watch?v=WMiggUPst-Q
+
 func rand_double(max float64) float64 {
 	return rand.Float64() * max
 }
@@ -132,6 +134,8 @@ func initGlfw() *glfw.Window {
 func draw(window *glfw.Window, program uint32) {
     gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
     gl.UseProgram(program)
+
+	// gl.VertexAttrib2f(0, 50, 50)
     
     glfw.PollEvents()
     window.SwapBuffers()
