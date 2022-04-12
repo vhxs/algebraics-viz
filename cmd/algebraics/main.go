@@ -22,6 +22,8 @@ func init() {
 // https://kylewbanks.com/blog/tutorial-opengl-with-golang-part-1-hello-opengl
 
 // VAO and VBO tutorial: https://www.youtube.com/watch?v=WMiggUPst-Q
+// https://stackoverflow.com/a/50408198
+// glVertex2f deprecated... explains why there is no gl.Vertex2f
 
 func rand_double(max float64) float64 {
 	return rand.Float64() * max
