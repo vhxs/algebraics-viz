@@ -133,7 +133,33 @@ func main() {
 
 	setupScene()
 	for !window.ShouldClose() {
-		drawScene()
+		// drawScene()
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		gl.MatrixMode(gl.MODELVIEW)
+		gl.LoadIdentity()
+		gl.Translatef(0, 0, -3.0)
+		gl.Rotatef(rotationX, 1, 0, 0)
+		gl.Rotatef(rotationY, 0, 1, 0)
+
+	// rotationX += 0.5
+	// rotationY += 0.5
+
+	gl.BindTexture(gl.TEXTURE_2D, texture)
+
+	gl.Color4f(1, 1, 1, 1)
+
+	gl.Begin(gl.QUADS)
+
+	gl.Normal3f(0, 0, 1)
+	gl.TexCoord2f(0, 0)
+	gl.Vertex3f(-1, -1, 1)
+	gl.TexCoord2f(1, 0)
+	gl.Vertex3f(1, -1, 1)
+	gl.TexCoord2f(1, 1)
+	gl.Vertex3f(1, 1, 1)
+	gl.TexCoord2f(0, 1)
+	gl.Vertex3f(-1, 1, 1)
+		gl.End()
 		window.SwapBuffers()
 		glfw.PollEvents()
 	}
