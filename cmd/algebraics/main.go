@@ -110,6 +110,13 @@ func init() {
 }
 
 func main() {
+	// stuff
+	var ox float64 = 0
+	var oy float64 = 0
+	var xres float64= 1000
+	var yres float64 = 1000
+	var zoom float64 = yres / 5
+
 	if err := glfw.Init(); err != nil {
 		log.Fatalln("failed to initialize glfw:", err)
 	}
@@ -131,35 +138,67 @@ func main() {
 	texture = newTexture("square.png")
 	defer gl.DeleteTextures(1, &texture)
 
-	setupScene()
+	// setupScene()
 	for !window.ShouldClose() {
 		// drawScene()
-		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		// gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		// gl.MatrixMode(gl.MODELVIEW)
+		// gl.LoadIdentity()
+		// gl.Translatef(0, 0, -3.0)
+		// gl.Rotatef(rotationX, 1, 0, 0)
+		// gl.Rotatef(rotationY, 0, 1, 0)
+
+		// // rotationX += 0.5
+		// // rotationY += 0.5
+
+		// gl.BindTexture(gl.TEXTURE_2D, texture)
+
+		// gl.Color4f(1, 1, 1, 1)
+
+		// gl.Begin(gl.QUADS)
+
+		// gl.Normal3f(0, 0, 1)
+		// gl.TexCoord2f(0, 0)
+		// gl.Vertex3f(-1, -1, 1)
+		// gl.TexCoord2f(1, 0)
+		// gl.Vertex3f(1, -1, 1)
+		// gl.TexCoord2f(1, 1)
+		// gl.Vertex3f(1, 1, 1)
+		// gl.TexCoord2f(0, 1)
+		// gl.Vertex3f(-1, 1, 1)
+
+		// gl.TexCoord2f(1,1); gl.Vertex2f(1,1);
+		// gl.TexCoord2f(1,0); gl.Vertex2f(1,0);
+		// gl.TexCoord2f(0,0); gl.Vertex2f(0,0);
+		// gl.TexCoord2f(0,1); gl.Vertex2f(0,1);
+		// gl.End()
+
 		gl.MatrixMode(gl.MODELVIEW)
-		gl.LoadIdentity()
-		gl.Translatef(0, 0, -3.0)
-		gl.Rotatef(rotationX, 1, 0, 0)
-		gl.Rotatef(rotationY, 0, 1, 0)
+		gl.PushMatrix()
+		gl.Scaled(zoom, zoom, zoom)
+		gl.Translated((xres/2/zoom)-ox,(yres/2/zoom)-oy,0)
 
-	// rotationX += 0.5
-	// rotationY += 0.5
+		gl.Enable(gl.BLEND)
+		gl.BlendFunc(gl.ONE, gl.ONE)
+		gl.Disable(gl.DEPTH_TEST)
+		gl.Enable(gl.TEXTURE_2D)
 
-	gl.BindTexture(gl.TEXTURE_2D, texture)
+		// pick up here
+		// glBindTexture(GL_TEXTURE_2D,tex)
+		gl.Begin(gl.QUADS)
 
-	gl.Color4f(1, 1, 1, 1)
+		// iterate over generated algebraic points
+		var x float32 = 10
+		var y float32 = 10
+		var r float32 = 5
+		gl.Color3f(0, 0, 1)
+		gl.TexCoord2f(1,1); gl.Vertex2f(x+r*16,y+r*16);
+		gl.TexCoord2f(1,0); gl.Vertex2f(x+r*16,y-r*16);
+		gl.TexCoord2f(0,0); gl.Vertex2f(x-r*16,y-r*16);
+		gl.TexCoord2f(0,1); gl.Vertex2f(x-r*16,y+r*16);
 
-	gl.Begin(gl.QUADS)
-
-	gl.Normal3f(0, 0, 1)
-	gl.TexCoord2f(0, 0)
-	gl.Vertex3f(-1, -1, 1)
-	gl.TexCoord2f(1, 0)
-	gl.Vertex3f(1, -1, 1)
-	gl.TexCoord2f(1, 1)
-	gl.Vertex3f(1, 1, 1)
-	gl.TexCoord2f(0, 1)
-	gl.Vertex3f(-1, 1, 1)
 		gl.End()
+
 		window.SwapBuffers()
 		glfw.PollEvents()
 	}
@@ -229,7 +268,6 @@ func setupScene() {
 
 func drawScene() {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
 	gl.MatrixMode(gl.MODELVIEW)
 	gl.LoadIdentity()
 	gl.Translatef(0, 0, -3.0)
