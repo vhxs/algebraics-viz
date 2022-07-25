@@ -17,12 +17,12 @@ func rand_double(max float64) float64 {
 	return rand.Float64() * max
 }
 
-func findroots_inner(coefs []complex128, deg int, roots []complex128) []complex128 {
+func findroots_inner(coefs []complex128, deg int, roots []complex128) (bool, []complex128) {
 	var root complex128
 	if deg == 1 {
 		root = -coefs[0] / coefs[1]
 		roots = append(roots, root)
-		return roots
+		return true, roots
 	}
 
 	var n int
@@ -41,8 +41,8 @@ func findroots_inner(coefs []complex128, deg int, roots []complex128) []complex1
 		}
 
 		if i >= 5000 {
-			// nonconv = 1, doesn't converge
-			break
+			// doesn't converge
+			return false, nil
 		}
 		i++
 
@@ -64,7 +64,7 @@ func findroots_inner(coefs []complex128, deg int, roots []complex128) []complex1
 			break
 		}
 	}
-	// fq[i]++
+
 	// add root
 	roots = append(roots, root)
 
@@ -78,16 +78,92 @@ func findroots_inner(coefs []complex128, deg int, roots []complex128) []complex1
 	return findroots_inner(coefs, deg-1, roots)
 }
 
-func findroots(coefs []complex128, deg int) []complex128 {
+func findroots(coefs []complex128, deg int) (bool, []complex128) {
 	roots := make([]complex128, 0)
-	roots = findroots_inner(coefs, deg, roots)
-	return roots
+	return findroots_inner(coefs, deg, roots)
+}
+
+// find roots of polynomials up to a certain height
+// as a way to bound the number of polynomials over which to compute the roots of
+// https://en.wikipedia.org/wiki/Height_function#Height_of_a_polynomial
+
+// The algebraic numbers are precisely those complex numbers that are roots
+// of polynomials with integer coefficients
+func compute_all_roots(max_height int) []complex128 {
+	points := make([]complex128, 0)
+
+	// iterate over polynomial height
+	for height := 2; height <= max_height; height++ {
+		fmt.Printf("Height: %d\n", height)
+		pos_coefs := make([]int, height)
+
+		// iterate over integer partitions of height
+		// partitions are represented as bit strings
+		for bits := 1<<(height-1) - 1; bits >= 0; bits -= 2 {
+			pos_coefs[0] = 0
+
+			// iterate over bits in the representation
+			// to construct a sequence of positive integers
+			deg := 0
+			for shift := height - 2; shift >= 0; shift-- {
+				if (bits>>shift)&1 == 1 {
+					pos_coefs[deg] += 1
+				} else {
+					deg += 1
+					pos_coefs[deg] = 0
+				}
+
+				if deg == 0 {
+					continue
+				}
+
+				// count nonzero elements
+				num_non_zero := 0
+				for i := deg; i >= 0; i-- {
+					if pos_coefs[i] != 0 {
+						num_non_zero += 1
+					}
+				}
+
+				if num_non_zero == 0 {
+					continue
+				}
+
+				// use bit string to represent signs
+				for sign_bits := 1<<(num_non_zero-1) - 1; sign_bits >= 0; sign_bits-- {
+					coefs := make([]complex128, deg+1)
+
+					// determine each coefficient in a polynomial
+					sign := 1
+					for c := deg; c >= 0; c-- {
+						coef := complex(float64(pos_coefs[c]), 0)
+						if pos_coefs[c] == 0 || c == deg {
+							coefs[c] = coef
+						} else {
+							if sign_bits&sign == 1 {
+								coefs[c] = coef
+							} else {
+								coefs[c] = -coef
+							}
+						}
+					}
+
+					// now that we have a polynomial, try to find roots
+					did_converge, roots := findroots(coefs, deg)
+					if did_converge {
+						points = append(points, roots...)
+					}
+				}
+			}
+		}
+	}
+
+	return points
 }
 
 func main() {
-	coefs := []complex128{complex(1, 0), complex(0, 0), complex(-1, 0)}
-	roots := findroots(coefs, 2)
+	points := compute_all_roots(15)
+	fmt.Printf("Number of algebraic numbers computed: %d\n", len(points))
 
-	fmt.Print(roots)
-	return
+	// next step: plot algebraics on 2d plane using OpenGL
 }
