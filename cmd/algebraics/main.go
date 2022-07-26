@@ -254,7 +254,7 @@ func main() {
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
-	window, err := glfw.CreateWindow(800, 600, "Testing", nil, nil)
+	window, err := glfw.CreateWindow(800, 600, "Algebraics", nil, nil)
 	if err != nil {
 		panic(err)
 	}
