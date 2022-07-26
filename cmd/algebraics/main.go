@@ -17,6 +17,7 @@ import (
 // https://commons.wikimedia.org/wiki/File:Algebraicszoom.png
 // https://kylewbanks.com/blog/tutorial-opengl-with-golang-part-1-hello-opengl
 // https://learnopengl.com/book/book_pdf.pdf
+// https://vkguide.dev/
 
 func rand_double(max float64) float64 {
 	return rand.Float64() * max
