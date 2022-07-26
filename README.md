@@ -4,4 +4,6 @@ The algebraic numbers are exactly those that are roots of a integer polynomial. 
 
 - [x] Implement Newton's method to find the roots of a polynomial
 - [x] Find the roots of lots and lots of polynomials (implement "precalc")
-- [ ] Figure out how to draw stuff using OpenGL
+- [x] Figure out how to draw a triangle using OpenGL.
+- [ ] Figure out how to draw one circle using OpenGL.
+- [ ] Figure out how to draw *many* circles using OpenGL.
