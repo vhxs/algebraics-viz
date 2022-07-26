@@ -7,3 +7,4 @@ The algebraic numbers are exactly those that are roots of a integer polynomial. 
 - [x] Figure out how to draw a triangle using OpenGL.
 - [ ] Figure out how to draw one circle using OpenGL.
 - [ ] Figure out how to draw *many* circles using OpenGL.
+- [ ] Do this in Vulkan
