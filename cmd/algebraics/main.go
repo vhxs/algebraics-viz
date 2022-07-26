@@ -233,6 +233,30 @@ func framebuffer_size_callback(window *glfw.Window, width int, height int) {
 	gl.Viewport(0, 0, int32(width), int32(height))
 }
 
+func createTriangle(vertices []float32) uint32 {
+	var VAO uint32
+	var VBO uint32
+
+	gl.GenVertexArrays(1, &VAO)
+	gl.GenBuffers(1, &VBO)
+
+	gl.BindVertexArray(VAO)
+	gl.BindBuffer(gl.ARRAY_BUFFER, VBO)
+
+	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*4, gl.Ptr(vertices), gl.STATIC_DRAW)
+
+	gl.VertexAttribPointerWithOffset(0, 3, gl.FLOAT, false, 3*4, 0)
+	gl.EnableVertexAttribArray(0)
+
+	gl.BindVertexArray(0)
+
+	return VAO
+}
+
+func createCircle(x int32, y int32, radius int32) uint32 {
+	return 0
+}
+
 func main() {
 	// points := compute_all_roots(15)
 	// fmt.Printf("Number of algebraic numbers computed: %d\n", len(points))
@@ -303,21 +327,7 @@ func main() {
 
 	vertices := []float32{-0.5, -0.5, 0, 0.5, -0.5, 0, 0, 0.5, 0}
 
-	var VAO uint32
-	var VBO uint32
-
-	gl.GenVertexArrays(1, &VAO)
-	gl.GenBuffers(1, &VBO)
-	gl.BindVertexArray(VAO)
-	gl.BindBuffer(gl.ARRAY_BUFFER, VBO)
-
-	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*4, gl.Ptr(vertices), gl.STATIC_DRAW)
-
-	gl.VertexAttribPointerWithOffset(0, 3, gl.FLOAT, false, 3*4, 0)
-	gl.EnableVertexAttribArray(0)
-
-	// gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	gl.BindVertexArray(0)
+	VAO := createTriangle(vertices)
 
 	for !window.ShouldClose() {
 		// Do OpenGL stuff.
