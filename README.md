@@ -10,3 +10,5 @@ The algebraic numbers are exactly those that are roots of a integer polynomial. 
 - [x] Figure out how to color things.
 - [x] Figure out how to texture things.
 - [ ] Do this all in Vulkan
+
+![](rendered.png)
