@@ -95,8 +95,9 @@ func findroots(coefs []complex128, deg int) (bool, []complex128) {
 
 // The algebraic numbers are precisely those complex numbers that are roots
 // of polynomials with integer coefficients
-func compute_all_roots(max_height int) ([]complex128, []int) {
+func compute_all_roots(max_height int) ([]complex128, []int, []int) {
 	points := make([]complex128, 0)
+	heights := make([]int, 0)
 	degs := make([]int, 0)
 
 	// iterate over polynomial height
@@ -120,7 +121,7 @@ func compute_all_roots(max_height int) ([]complex128, []int) {
 					pos_coefs[deg] = 0
 				}
 
-				if deg == 0 {
+				if deg <= 0 {
 					continue
 				}
 
@@ -160,6 +161,7 @@ func compute_all_roots(max_height int) ([]complex128, []int) {
 					if did_converge {
 						points = append(points, roots...)
 						for i := 0; i < len(roots); i++ {
+							heights = append(heights, height)
 							degs = append(degs, deg)
 						}
 					}
@@ -168,7 +170,7 @@ func compute_all_roots(max_height int) ([]complex128, []int) {
 		}
 	}
 
-	return points, degs
+	return points, heights, degs
 }
 
 func compileShader(source string, shaderType uint32) (uint32, error) {
@@ -258,18 +260,18 @@ func createTriangle(vertices []float32) uint32 {
 }
 
 // https://stackoverflow.com/questions/59468388/how-to-use-gl-triangle-fan-to-draw-a-circle-in-opengl
-func createCircle(xCenter float32, yCenter float32, radius float32, numSides int) uint32 {
+func createCircle(xCenter float32, yCenter float32, radius float32, numSides int, r float32, g float32, b float32) uint32 {
 	var VAO uint32
 	var VBO uint32
 
 	numVertices := numSides + 2
 
-	vertices := []float32{xCenter, yCenter, 0}
+	vertices := []float32{xCenter, yCenter, 0, r, g, b}
 
 	for i := 1; i < numVertices; i++ {
 		x := xCenter + radius*float32(math.Cos(float64(i)*2.0*math.Pi/float64(numSides)))
 		y := yCenter + radius*float32(math.Sin(float64(i)*2.0*math.Pi/float64(numSides)))
-		vertices = append(vertices, x, y, 0)
+		vertices = append(vertices, x, y, 0, r, g, b)
 	}
 
 	gl.GenVertexArrays(1, &VAO)
@@ -280,23 +282,43 @@ func createCircle(xCenter float32, yCenter float32, radius float32, numSides int
 
 	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*4, gl.Ptr(vertices), gl.STATIC_DRAW)
 
-	gl.VertexAttribPointerWithOffset(0, 3, gl.FLOAT, false, 3*4, 0)
+	gl.VertexAttribPointerWithOffset(0, 3, gl.FLOAT, false, 6*4, 0)
+	gl.VertexAttribPointerWithOffset(1, 3, gl.FLOAT, false, 6*4, 3*4)
 	gl.EnableVertexAttribArray(0)
+	gl.EnableVertexAttribArray(1)
 
 	gl.BindVertexArray(0)
 
 	return VAO
 }
 
-func createCircles(points []complex128, degs []int, numSides int) []uint32 {
+func createCircles(points []complex128, heights []int, degs []int, numSides int) []uint32 {
+	colors := [][]float32{
+		{1, 0, 0},
+		{0, 1, 0},
+		{0, 0, 1},
+		{0.7, 0.7, 0},
+		{1, 0.6, 0},
+		{0, 1, 1},
+		{1, 0, 1},
+		{0.6, 0.6, 0.6},
+	}
+
 	VAOs := make([]uint32, 0)
 
 	for i := 0; i < len(points); i++ {
 		xCenter := real(points[i])
 		yCenter := imag(points[i])
-		radius := math.Pow(0.5, float64(degs[i]))
+		radius := math.Pow(0.5, float64(heights[i]))
 
-		VAO := createCircle(float32(xCenter), float32(yCenter), float32(radius), numSides)
+		var color []float32
+		if degs[i] < 8 {
+			color = colors[degs[i]-1]
+		} else {
+			color = []float32{1, 1, 1}
+		}
+
+		VAO := createCircle(float32(xCenter), float32(yCenter), float32(radius), numSides, color[0], color[1], color[2])
 		VAOs = append(VAOs, VAO)
 	}
 
@@ -304,10 +326,7 @@ func createCircles(points []complex128, degs []int, numSides int) []uint32 {
 }
 
 func main() {
-	points, degs := compute_all_roots(10)
-	// fmt.Printf("Number of algebraic numbers computed: %d\n", len(points))
-
-	// next step: plot algebraics on 2d plane using OpenGL
+	points, heights, degs := compute_all_roots(12)
 
 	// references:
 	// https://github.com/JoeyDeVries/LearnOpenGL/blob/master/src/1.getting_started/2.1.hello_triangle/hello_triangle.cpp
@@ -325,7 +344,8 @@ func main() {
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
-	window, err := glfw.CreateWindow(800, 800, "Algebraics", nil, nil)
+
+	window, err := glfw.CreateWindow(1000, 1000, "Algebraics", nil, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -343,12 +363,16 @@ func main() {
 	#version 450 core
 
     layout (location = 0) in vec3 aPos;
+	layout (location = 1) in vec3 aColor;
+
+	out vec3 ourColor;
 
     void main()
 
     {
 
        gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+	   ourColor = aColor;
 
     }` + "\x00"
 
@@ -356,12 +380,13 @@ func main() {
 	#version 450 core
 
     out vec4 FragColor;
+	in vec3 ourColor;
 
     void main()
 
     {
 
-       FragColor = vec4(0.0f, 0.5f, 0.2f, 1.0f);
+       FragColor = vec4(ourColor, 1.0f);
 
     }` + "\x00"
 
@@ -371,24 +396,17 @@ func main() {
 		panic(err)
 	}
 
-	// vertices := []float32{-0.5, -0.5, 0, 0.5, -0.5, 0, 0, 0.5, 0}
-	// VAO := createTriangle(vertices)
 	numSides := 50
-	// VAO1 := createCircle(0, 0, 0.5, numSides)
-	// VAO2 := createCircle(0.5, 0.5, 0.2, numSides)
 
-	VAOs := createCircles(points, degs, numSides)
+	VAOs := createCircles(points, heights, degs, numSides)
 
 	for !window.ShouldClose() {
 		// Do OpenGL stuff.
 
-		gl.ClearColor(0.2, 0.3, 0.3, 1)
+		gl.ClearColor(0, 0, 0, 1)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 
 		gl.UseProgram(program)
-		// gl.BindVertexArray(VAO)
-		// gl.DrawArrays(gl.TRIANGLES, 0, 3)
-		// gl.DrawArrays(gl.TRIANGLE_FAN, 0, int32(numSides)+2)
 
 		for v := 0; v < len(VAOs); v++ {
 			gl.BindVertexArray(VAOs[v])
