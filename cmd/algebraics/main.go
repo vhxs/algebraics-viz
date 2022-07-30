@@ -95,8 +95,9 @@ func findroots(coefs []complex128, deg int) (bool, []complex128) {
 
 // The algebraic numbers are precisely those complex numbers that are roots
 // of polynomials with integer coefficients
-func compute_all_roots(max_height int) []complex128 {
+func compute_all_roots(max_height int) ([]complex128, []int) {
 	points := make([]complex128, 0)
+	degs := make([]int, 0)
 
 	// iterate over polynomial height
 	for height := 2; height <= max_height; height++ {
@@ -158,13 +159,16 @@ func compute_all_roots(max_height int) []complex128 {
 					did_converge, roots := findroots(coefs, deg)
 					if did_converge {
 						points = append(points, roots...)
+						for i := 0; i < len(roots); i++ {
+							degs = append(degs, deg)
+						}
 					}
 				}
 			}
 		}
 	}
 
-	return points
+	return points, degs
 }
 
 func compileShader(source string, shaderType uint32) (uint32, error) {
@@ -254,11 +258,10 @@ func createTriangle(vertices []float32) uint32 {
 }
 
 // https://stackoverflow.com/questions/59468388/how-to-use-gl-triangle-fan-to-draw-a-circle-in-opengl
-func createCircle(xCenter float32, yCenter float32, radius float32) uint32 {
+func createCircle(xCenter float32, yCenter float32, radius float32, numSides int) uint32 {
 	var VAO uint32
 	var VBO uint32
 
-	numSides := 50
 	numVertices := numSides + 2
 
 	vertices := []float32{xCenter, yCenter, 0}
@@ -285,8 +288,23 @@ func createCircle(xCenter float32, yCenter float32, radius float32) uint32 {
 	return VAO
 }
 
+func createCircles(points []complex128, degs []int, numSides int) []uint32 {
+	VAOs := make([]uint32, 0)
+
+	for i := 0; i < len(points); i++ {
+		xCenter := real(points[i])
+		yCenter := imag(points[i])
+		radius := math.Pow(0.5, float64(degs[i]))
+
+		VAO := createCircle(float32(xCenter), float32(yCenter), float32(radius), numSides)
+		VAOs = append(VAOs, VAO)
+	}
+
+	return VAOs
+}
+
 func main() {
-	// points := compute_all_roots(15)
+	points, degs := compute_all_roots(10)
 	// fmt.Printf("Number of algebraic numbers computed: %d\n", len(points))
 
 	// next step: plot algebraics on 2d plane using OpenGL
@@ -355,7 +373,11 @@ func main() {
 
 	// vertices := []float32{-0.5, -0.5, 0, 0.5, -0.5, 0, 0, 0.5, 0}
 	// VAO := createTriangle(vertices)
-	VAO := createCircle(0, 0, 0.5)
+	numSides := 50
+	// VAO1 := createCircle(0, 0, 0.5, numSides)
+	// VAO2 := createCircle(0.5, 0.5, 0.2, numSides)
+
+	VAOs := createCircles(points, degs, numSides)
 
 	for !window.ShouldClose() {
 		// Do OpenGL stuff.
@@ -364,9 +386,14 @@ func main() {
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 
 		gl.UseProgram(program)
-		gl.BindVertexArray(VAO)
+		// gl.BindVertexArray(VAO)
 		// gl.DrawArrays(gl.TRIANGLES, 0, 3)
-		gl.DrawArrays(gl.TRIANGLE_FAN, 0, 52)
+		// gl.DrawArrays(gl.TRIANGLE_FAN, 0, int32(numSides)+2)
+
+		for v := 0; v < len(VAOs); v++ {
+			gl.BindVertexArray(VAOs[v])
+			gl.DrawArrays(gl.TRIANGLE_FAN, 0, int32(numSides)+2)
+		}
 
 		window.SwapBuffers()
 		glfw.PollEvents()
