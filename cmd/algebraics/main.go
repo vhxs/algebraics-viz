@@ -253,8 +253,36 @@ func createTriangle(vertices []float32) uint32 {
 	return VAO
 }
 
-func createCircle(x int32, y int32, radius int32) uint32 {
-	return 0
+// https://stackoverflow.com/questions/59468388/how-to-use-gl-triangle-fan-to-draw-a-circle-in-opengl
+func createCircle(xCenter float32, yCenter float32, radius float32) uint32 {
+	var VAO uint32
+	var VBO uint32
+
+	numSides := 50
+	numVertices := numSides + 2
+
+	vertices := []float32{xCenter, yCenter, 0}
+
+	for i := 1; i < numVertices; i++ {
+		x := xCenter + radius*float32(math.Cos(float64(i)*2.0*math.Pi/float64(numSides)))
+		y := yCenter + radius*float32(math.Sin(float64(i)*2.0*math.Pi/float64(numSides)))
+		vertices = append(vertices, x, y, 0)
+	}
+
+	gl.GenVertexArrays(1, &VAO)
+	gl.GenBuffers(1, &VBO)
+
+	gl.BindVertexArray(VAO)
+	gl.BindBuffer(gl.ARRAY_BUFFER, VBO)
+
+	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*4, gl.Ptr(vertices), gl.STATIC_DRAW)
+
+	gl.VertexAttribPointerWithOffset(0, 3, gl.FLOAT, false, 3*4, 0)
+	gl.EnableVertexAttribArray(0)
+
+	gl.BindVertexArray(0)
+
+	return VAO
 }
 
 func main() {
@@ -279,7 +307,7 @@ func main() {
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
-	window, err := glfw.CreateWindow(800, 600, "Algebraics", nil, nil)
+	window, err := glfw.CreateWindow(800, 800, "Algebraics", nil, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -325,9 +353,9 @@ func main() {
 		panic(err)
 	}
 
-	vertices := []float32{-0.5, -0.5, 0, 0.5, -0.5, 0, 0, 0.5, 0}
-
-	VAO := createTriangle(vertices)
+	// vertices := []float32{-0.5, -0.5, 0, 0.5, -0.5, 0, 0, 0.5, 0}
+	// VAO := createTriangle(vertices)
+	VAO := createCircle(0, 0, 0.5)
 
 	for !window.ShouldClose() {
 		// Do OpenGL stuff.
@@ -337,7 +365,8 @@ func main() {
 
 		gl.UseProgram(program)
 		gl.BindVertexArray(VAO)
-		gl.DrawArrays(gl.TRIANGLES, 0, 3)
+		// gl.DrawArrays(gl.TRIANGLES, 0, 3)
+		gl.DrawArrays(gl.TRIANGLE_FAN, 0, 52)
 
 		window.SwapBuffers()
 		glfw.PollEvents()
