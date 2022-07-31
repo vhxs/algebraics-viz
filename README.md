@@ -9,6 +9,7 @@ The algebraic numbers are exactly those that are roots of a integer polynomial. 
 - [x] Figure out how to draw *many* circles using OpenGL.
 - [x] Figure out how to color things.
 - [ ] Figure out how to texture things.
+  - [ ] Figure out how to change zoom 
   - [ ] What are mipmaps?
 - [ ] Do this all in Vulkan
 
