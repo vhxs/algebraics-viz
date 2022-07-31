@@ -89,31 +89,31 @@ func findroots(coefs []complex128, deg int) (bool, []complex128) {
 	return findroots_inner(coefs, deg, roots)
 }
 
-// find roots of polynomials up to a certain height
+// find roots of polynomials up to a certain length
 // as a way to bound the number of polynomials over which to compute the roots of
-// https://en.wikipedia.org/wiki/Height_function#Height_of_a_polynomial
+// https://en.wikipedia.org/wiki/height_function#height_of_a_polynomial
 
 // The algebraic numbers are precisely those complex numbers that are roots
 // of polynomials with integer coefficients
-func compute_all_roots(max_height int) ([]complex128, []int, []int) {
+func compute_all_roots(max_length int) ([]complex128, []int, []int) {
 	points := make([]complex128, 0)
-	heights := make([]int, 0)
+	lengths := make([]int, 0)
 	degs := make([]int, 0)
 
-	// iterate over polynomial height
-	for height := 2; height <= max_height; height++ {
-		fmt.Printf("Height: %d\n", height)
-		pos_coefs := make([]int, height)
+	// iterate over polynomial length
+	for length := 2; length <= max_length; length++ {
+		fmt.Printf("Length: %d\n", length)
+		pos_coefs := make([]int, length)
 
-		// iterate over integer partitions of height
+		// iterate over integer partitions of length
 		// partitions are represented as bit strings
-		for bits := 1<<(height-1) - 1; bits >= 0; bits -= 2 {
+		for bits := 1<<(length-1) - 1; bits >= 0; bits -= 2 {
 			pos_coefs[0] = 0
 
 			// iterate over bits in the representation
 			// to construct a sequence of positive integers
 			deg := 0
-			for shift := height - 2; shift >= 0; shift-- {
+			for shift := length - 2; shift >= 0; shift-- {
 				if (bits>>shift)&1 == 1 {
 					pos_coefs[deg] += 1
 				} else {
@@ -161,7 +161,7 @@ func compute_all_roots(max_height int) ([]complex128, []int, []int) {
 					if did_converge {
 						points = append(points, roots...)
 						for i := 0; i < len(roots); i++ {
-							heights = append(heights, height)
+							lengths = append(lengths, length)
 							degs = append(degs, deg)
 						}
 					}
@@ -170,7 +170,7 @@ func compute_all_roots(max_height int) ([]complex128, []int, []int) {
 		}
 	}
 
-	return points, heights, degs
+	return points, lengths, degs
 }
 
 func compileShader(source string, shaderType uint32) (uint32, error) {
@@ -235,28 +235,8 @@ func init() {
 	runtime.LockOSThread()
 }
 
-func framebuffer_size_callback(window *glfw.Window, width int, height int) {
-	gl.Viewport(0, 0, int32(width), int32(height))
-}
-
-func createTriangle(vertices []float32) uint32 {
-	var VAO uint32
-	var VBO uint32
-
-	gl.GenVertexArrays(1, &VAO)
-	gl.GenBuffers(1, &VBO)
-
-	gl.BindVertexArray(VAO)
-	gl.BindBuffer(gl.ARRAY_BUFFER, VBO)
-
-	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*4, gl.Ptr(vertices), gl.STATIC_DRAW)
-
-	gl.VertexAttribPointerWithOffset(0, 3, gl.FLOAT, false, 3*4, 0)
-	gl.EnableVertexAttribArray(0)
-
-	gl.BindVertexArray(0)
-
-	return VAO
+func framebuffer_size_callback(window *glfw.Window, width int, length int) {
+	gl.Viewport(0, 0, int32(width), int32(length))
 }
 
 // https://stackoverflow.com/questions/59468388/how-to-use-gl-triangle-fan-to-draw-a-circle-in-opengl
@@ -292,7 +272,7 @@ func createCircle(xCenter float32, yCenter float32, radius float32, numSides int
 	return VAO
 }
 
-func createCircles(points []complex128, heights []int, degs []int, numSides int) []uint32 {
+func createCircles(points []complex128, lengths []int, degs []int, numSides int) []uint32 {
 	colors := [][]float32{
 		{1, 0, 0},
 		{0, 1, 0},
@@ -309,7 +289,7 @@ func createCircles(points []complex128, heights []int, degs []int, numSides int)
 	for i := 0; i < len(points); i++ {
 		xCenter := real(points[i])
 		yCenter := imag(points[i])
-		radius := math.Pow(0.5, float64(heights[i]))
+		radius := math.Pow(0.5, float64(lengths[i]))
 
 		var color []float32
 		if degs[i] < 8 {
@@ -326,7 +306,7 @@ func createCircles(points []complex128, heights []int, degs []int, numSides int)
 }
 
 func main() {
-	points, heights, degs := compute_all_roots(12)
+	points, lengths, degs := compute_all_roots(12)
 
 	// references:
 	// https://github.com/JoeyDeVries/LearnOpenGL/blob/master/src/1.getting_started/2.1.hello_triangle/hello_triangle.cpp
@@ -398,7 +378,11 @@ func main() {
 
 	numSides := 50
 
-	VAOs := createCircles(points, heights, degs, numSides)
+	VAOs := createCircles(points, lengths, degs, numSides)
+
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.ONE, gl.ONE)
+	gl.Disable(gl.DEPTH_TEST)
 
 	for !window.ShouldClose() {
 		// Do OpenGL stuff.
