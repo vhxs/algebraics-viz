@@ -63,7 +63,7 @@ def find_roots(polynomial: ComplexPolynomial) -> Optional[RootSet]:
         length=original_length
     )
 
-def enumerate_polynomials(max_length: int) -> Generator[RootSet]:
+def enumerate_polynomials_sjbrooks(max_length: int) -> Generator[RootSet]:
     # The length of a polynomial is a sum of the absolute values of its coefficients.
     # Iterating over integer polynomials of a particular length gives us a way to enumerate
     # these polynomials, since there are finitely many such polynomials.
@@ -104,5 +104,5 @@ def enumerate_polynomials(max_length: int) -> Generator[RootSet]:
                 yield ComplexPolynomial(coefficients=coefficients)
 
 if __name__ == "__main__":
-    for polynomial in enumerate_polynomials(12):
+    for polynomial in enumerate_polynomials_sjbrooks(12):
         print(polynomial)
