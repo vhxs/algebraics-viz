@@ -1,15 +1,16 @@
 [project]
-name = "algebraics-viz"
+name = "algebraics"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "dynaconf>=3.2.10",
     "glfw>=2.8.0",
     "imageio>=2.37.0",
     "pydantic>=2.11.1",
     "pyopengl>=3.1.9",
     "pyopengl-accelerate>=3.1.9",
     "pytest>=8.3.5",
-    "streamlit>=1.44.0",
 ]
+packages = [{ include = "algebraics" }]
