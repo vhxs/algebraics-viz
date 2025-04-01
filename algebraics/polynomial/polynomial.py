@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Generator, Optional
 from algebraics.polynomial.models import ComplexPolynomial, RootSet
 from dynaconf import Dynaconf
 import random
@@ -63,52 +63,46 @@ def find_roots(polynomial: ComplexPolynomial) -> Optional[RootSet]:
         length=original_length
     )
 
-# def enumerate_root_sets(max_length: int) -> list[RootSet]:
-#     roots: list[RootSet] = []
-    
-#     # The length of a polynomial is a sum of the absolute values of its coefficients.
-#     # Iterating over integer polynomials of a particular length gives us a way to enumerate
-#     # these polynomials, since there are finitely many such polynomials.
-#     for length in range(2, max_length + 1):
-#         positive_coefficients = [0] * length
+def enumerate_polynomials(max_length: int) -> Generator[RootSet]:
+    # The length of a polynomial is a sum of the absolute values of its coefficients.
+    # Iterating over integer polynomials of a particular length gives us a way to enumerate
+    # these polynomials, since there are finitely many such polynomials.
+    for length in range(2, max_length + 1):
+        positive_coefficients = [0] * length
         
-#         # bits is an integer that encodes a bit vector.
-#         for bits in range((1 << (length - 1)) - 1, -1, -2):
-#             positive_coefficients[0] = 0
-#             degree = 0
+        # bits is an integer that encodes a bit vector.
+        for bits in range((1 << (length - 1)) - 1, -1, -2):
+            positive_coefficients[0] = 0
+            degree = 0
             
-#             for shift in range(length - 2, -1, -1):
-#                 if (bits >> shift) & 1:
-#                     positive_coefficients[degree] += 1
-#                 else:
-#                     degree += 1
-#                     positive_coefficients[degree] = 0
+            for shift in range(length - 2, -1, -1):
+                if (bits >> shift) & 1:
+                    positive_coefficients[degree] += 1
+                else:
+                    degree += 1
+                    positive_coefficients[degree] = 0
                 
-#             if degree <= 0:
-#                 continue
+            if degree <= 0:
+                continue
                 
-#             num_non_zero = sum(1 for i in range(degree + 1) if positive_coefficients[i] != 0)
-#             if num_non_zero == 0:
-#                 continue
+            num_non_zero = sum(1 for i in range(degree + 1) if positive_coefficients[i] != 0)
+            if num_non_zero == 0:
+                continue
             
-#             for sign_bits in range((1 << (num_non_zero - 1)) - 1, -1, -1):
-#                 coefficients = [0] * (degree + 1)
-#                 sign_pointer = 1
+            for sign_bits in range((1 << (num_non_zero - 1)) - 1, -1, -1):
+                coefficients = [0] * (degree + 1)
+                sign_pointer = 1
                 
-#                 for c in range(degree, -1, -1):
-#                     coef = complex(float(positive_coefficients[c]), 0)
-#                     if positive_coefficients[c] == 0 or c == degree:
-#                         coefficients[c] = coef
-#                     else:
-#                         coefficients[c] = coef if sign_bits & sign_pointer else -coef
-#                         sign_pointer <<= 1
+                for c in range(degree, -1, -1):
+                    coef = complex(float(positive_coefficients[c]), 0)
+                    if positive_coefficients[c] == 0 or c == degree:
+                        coefficients[c] = coef
+                    else:
+                        coefficients[c] = coef if sign_bits & sign_pointer else -coef
+                        sign_pointer <<= 1
                 
-#                 polynomial = ComplexPolynomial(coefficients=coefficients)
-#                 did_converge, root_set = find_roots(polynomial)
-#                 if did_converge:
-#                     roots.append(RootSet(
-#                         roots=root_set,
-#                         length=length
-#                     ))
-    
-#     return roots
+                yield ComplexPolynomial(coefficients=coefficients)
+
+if __name__ == "__main__":
+    for polynomial in enumerate_polynomials(12):
+        print(polynomial)
