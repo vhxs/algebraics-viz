@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Union
 from pydantic import AfterValidator, BaseModel, computed_field
 
 
@@ -7,7 +7,7 @@ class RootSet(BaseModel):
     Corresponds to roots of a single-variable complex polynomial
     """
     roots: list[complex]
-    length: int
+    length: Union[int, float]
 
     @computed_field # type: ignore
     @property

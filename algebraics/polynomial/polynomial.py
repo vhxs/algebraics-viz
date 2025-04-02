@@ -34,7 +34,7 @@ def find_roots(polynomial: ComplexPolynomial) -> Optional[RootSet]:
 
             for _ in range(settings.POLYNOMIAL.MAX_ATTEMPTS_PER_ROOT):
                 previous_root = candidate_root
-                polynomial_value, derivative_value, power_term = 0, 0, 1
+                polynomial_value, derivative_value, power_term = complex(0, 0), complex(0, 0), complex(1, 0)
                 
                 for n in range(degree):
                     polynomial_value += power_term * polynomial.coefficients[n]
