@@ -9,7 +9,7 @@ class RootSet(BaseModel):
     roots: list[complex]
     length: int
 
-    @computed_field
+    @computed_field # type: ignore
     @property
     def degree(self) -> int:
         return len(self.roots) - 1
@@ -21,14 +21,17 @@ def drop_ending_zeros(coefficients: list[complex]):
     return coefficients[:index+1]
 
 class ComplexPolynomial(BaseModel):
+    """
+    a_0 + a_1x^1 + ... + a_nx^n
+    """
     coefficients: Annotated[list[complex], AfterValidator(drop_ending_zeros)]
 
-    @computed_field
+    @computed_field # type: ignore
     @property
     def degree(self) -> int:
         return len(self.coefficients) - 1
     
-    @computed_field
+    @computed_field # type: ignore
     @property
     def length(self) -> float:
         return sum(abs(coefficient) for coefficient in self.coefficients)
