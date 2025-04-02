@@ -92,15 +92,15 @@ def enumerate_polynomials_sjbrooks(max_length: int) -> Generator[ComplexPolynomi
                 continue
             
             for sign_bits in range((1 << (num_non_zero - 1)) - 1, -1, -1):
-                coefficients = [0] * (degree + 1)
+                coefficients = [complex(0, 0)] * (degree + 1)
                 sign_pointer = 1
                 
                 for c in range(degree, -1, -1):
                     coef = complex(float(positive_coefficients[c]), 0)
                     if positive_coefficients[c] == 0 or c == degree:
-                        coefficients[c] = coef
+                        coefficients[c] = complex(coef, 0)
                     else:
-                        coefficients[c] = coef if sign_bits & sign_pointer else -coef
+                        coefficients[c] = complex(coef, 0) if sign_bits & sign_pointer else complex(-coef, 0)
                         sign_pointer <<= 1
                 
                 yield ComplexPolynomial(coefficients=coefficients)
