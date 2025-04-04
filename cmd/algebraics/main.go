@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/go-gl/gl/v4.5-core/gl"
+	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
@@ -153,6 +153,7 @@ func compute_all_roots(max_length int) ([]complex128, []int, []int) {
 							} else {
 								coefs[c] = -coef
 							}
+							sign <<= 1
 						}
 					}
 
@@ -340,24 +341,21 @@ func main() {
 	window.SetFramebufferSizeCallback(framebuffer_size_callback)
 
 	vertexShaderSource := `
-	#version 450 core
+	#version 410 core
 
-    layout (location = 0) in vec3 aPos;
-	layout (location = 1) in vec3 aColor;
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aColor;
 
-	out vec3 ourColor;
+out vec3 ourColor;
 
-    void main()
-
-    {
-
-       gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-	   ourColor = aColor;
-
-    }` + "\x00"
+void main()
+{
+    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    ourColor = aColor;
+}` + "\x00"
 
 	fragmentShaderSource := `
-	#version 450 core
+	#version 410 core
 
     out vec4 FragColor;
 	in vec3 ourColor;
