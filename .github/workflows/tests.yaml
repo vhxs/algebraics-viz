@@ -30,10 +30,7 @@ jobs:
       - name: Install dependencies
         run: |
           uv sync
-          uv pip list
-
-      - name: Install local package
-        run: uv pip install -e .
+          pwd
 
       - name: Run tests
         run: uv run pytest
