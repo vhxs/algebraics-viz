@@ -1,5 +1,5 @@
 import glfw
-from OpenGL.GL import *
+from OpenGL.GL import GL_COLOR_BUFFER_BIT, glClear
 
 from algebraics.graphics.models import Circle
 from algebraics.graphics.rendering import draw_circle, setup_gl
