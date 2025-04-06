@@ -20,5 +20,5 @@ dependencies = [
   build-backend = "setuptools.build_meta"
 
 [tool.ruff]
-select = ["I"]
+lint.select = ["I"]
 line-length = 88
