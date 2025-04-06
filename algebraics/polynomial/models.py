@@ -25,16 +25,12 @@ class ComplexPolynomial(BaseModel):
     a_0 + a_1x^1 + ... + a_nx^n
     """
     coefficients: Annotated[list[complex], AfterValidator(drop_ending_zeros)]
+    length: int # note, this isn't always the length, it sorta correlates with the length though
 
     @computed_field # type: ignore
     @property
     def degree(self) -> int:
         return len(self.coefficients) - 1
-    
-    @computed_field # type: ignore
-    @property
-    def length(self) -> float:
-        return sum(abs(coefficient) for coefficient in self.coefficients)
     
     def divide_in_place(self, root: complex):
         degree = self.degree

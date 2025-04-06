@@ -72,50 +72,45 @@ def enumerate_polynomials_sjbrooks(max_length: int) -> Generator[ComplexPolynomi
     for length in range(2, max_length + 1):
         positive_coefficients = [0] * length
         
-        # bits is an integer that encodes a bit vector.
+        # These bits encode the coefficients of a polynomial in a very specific kind of way.
         for bits in range((1 << (length - 1)) - 1, -1, -2):
             positive_coefficients[0] = 0
             degree = 0
             
             for shift in range(length - 2, -1, -1):
-                if (bits >> shift) & 1:
+                if (bits >> shift) & 1 == 1:
                     positive_coefficients[degree] += 1
                 else:
                     degree += 1
                     positive_coefficients[degree] = 0
                 
-            if degree <= 0:
-                continue
+                if degree <= 0:
+                    continue
                 
-            num_non_zero = sum(1 for i in range(degree + 1) if positive_coefficients[i] != 0)
-            if num_non_zero == 0:
-                continue
-            
-            for sign_bits in range((1 << (num_non_zero - 1)) - 1, -1, -1):
-                coefficients = [complex(0, 0)] * (degree + 1)
-                sign_pointer = 1
+                num_non_zero = sum(1 for i in range(degree + 1) if positive_coefficients[i] != 0)
+                if num_non_zero == 0:
+                    continue
                 
-                for c in range(degree, -1, -1):
-                    coef = complex(float(positive_coefficients[c]), 0)
-                    if positive_coefficients[c] == 0 or c == degree:
-                        coefficients[c] = complex(coef, 0)
-                    else:
-                        coefficients[c] = complex(coef, 0) if sign_bits & sign_pointer else complex(-coef, 0)
-                        sign_pointer <<= 1
-                
-                yield ComplexPolynomial(coefficients=coefficients)
+                for sign_bits in range((1 << (num_non_zero - 1)) - 1, -1, -1):
+                    coefficients = [complex(0, 0)] * (degree + 1)
+                    sign_pointer = 1
+                    
+                    for c in range(degree, -1, -1):
+                        coef = complex(float(positive_coefficients[c]), 0)
+                        if positive_coefficients[c] == 0 or c == degree:
+                            coefficients[c] = complex(coef, 0)
+                        else:
+                            coefficients[c] = complex(coef, 0) if sign_bits & sign_pointer else complex(-coef, 0)
+                            sign_pointer <<= 1
+                    yield ComplexPolynomial(coefficients=coefficients, length=length)
 
 def enumerate_polynomials(max_length: int, max_degree: int) -> Generator[ComplexPolynomial]:
-    for length in range(max_length):
-        for degree in range(max_degree):
-            for partition in enumerate_partitions(length + degree, degree):
+    for length in range(max_length + 1):
+        for degree in range(2, max_degree + 1):
+            for partition in enumerate_partitions(length + degree + 1, degree + 1):
                 coefficients = [x - 1 for x in partition]
                 if coefficients and coefficients[-1] != 0:
                     yield from map(
-                        lambda coefs: ComplexPolynomial(coefficients=[complex(x, 0) for x in coefs]),
+                        lambda coefs: ComplexPolynomial(coefficients=[complex(x, 0) for x in coefs], length=length),
                         generate_signs(coefficients)
                     )
-
-if __name__ == "__main__":
-    for polynomial in enumerate_polynomials(4, 4):
-        print([int(x.real) for x in polynomial.coefficients])
