@@ -31,7 +31,7 @@ jobs:
         run: |
           uv sync
           pwd
-          ls
+          ls -a
 
       - name: Run tests
         run: uv run pytest
