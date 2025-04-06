@@ -32,5 +32,8 @@ jobs:
           uv venv
           uv sync
 
+      - name: Run Ruff
+        run: ruff check .
+
       - name: Run tests
         run: uv run pytest

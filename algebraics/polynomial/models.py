@@ -1,4 +1,5 @@
 from typing import Annotated, Union
+
 from pydantic import AfterValidator, BaseModel, computed_field
 
 

@@ -1,4 +1,5 @@
 import pytest
+
 from algebraics.polynomial.models import ComplexPolynomial
 from algebraics.polynomial.polynomial import find_roots
 

@@ -1,7 +1,21 @@
-from OpenGL.GL import *
 import math
 
+from OpenGL.GL import (
+    GL_PROJECTION,
+    GL_TRIANGLE_FAN,
+    glBegin,
+    glClearColor,
+    glColor3f,
+    glEnd,
+    glFlush,
+    glLoadIdentity,
+    glMatrixMode,
+    glOrtho,
+    glVertex2f,
+)
+
 from algebraics.graphics.models import Circle
+
 
 def draw_circle(circle: Circle):
     glColor3f(circle.red, circle.green, circle.blue)

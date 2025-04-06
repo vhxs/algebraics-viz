@@ -3,7 +3,11 @@ from OpenGL.GL import *
 
 from algebraics.graphics.models import Circle
 from algebraics.graphics.rendering import draw_circle, setup_gl
-from algebraics.polynomial.polynomial import enumerate_polynomials, enumerate_polynomials_sjbrooks, find_roots
+from algebraics.polynomial.polynomial import (
+    enumerate_polynomials,
+    enumerate_polynomials_sjbrooks,
+    find_roots,
+)
 
 COLORS = [
     [1.0, 0.0, 0.0],

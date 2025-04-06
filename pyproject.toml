@@ -18,3 +18,7 @@ dependencies = [
 [build-system]
   requires = ["setuptools"]
   build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+select = ["I"]
+line-length = 88

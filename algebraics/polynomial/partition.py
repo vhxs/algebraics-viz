@@ -1,6 +1,7 @@
 import itertools
 from typing import Generator
 
+
 def enumerate_partitions(n: int, length: int) -> Generator[list[int]]:
     def enumerate_partitions_recursive(n, current_partition) -> Generator[list[int]]:
         if len(current_partition) == length:
@@ -23,7 +24,3 @@ def generate_signs(partition: list[int]) -> Generator[list[int]]:
             signs.append([number])
 
     yield from itertools.product(*signs)
-
-if __name__ == "__main__":
-    for p in enumerate_partitions(4 + 3, 3):
-        print(p)

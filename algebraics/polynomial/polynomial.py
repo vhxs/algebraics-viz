@@ -1,10 +1,10 @@
-from typing import Generator, Optional
-from algebraics.polynomial.models import ComplexPolynomial, RootSet
-from dynaconf import Dynaconf
 import random
+from typing import Generator, Optional
 
+from dynaconf import Dynaconf
+
+from algebraics.polynomial.models import ComplexPolynomial, RootSet
 from algebraics.polynomial.partition import enumerate_partitions, generate_signs
-
 
 settings = Dynaconf(
     settings_files=["settings.toml"],
