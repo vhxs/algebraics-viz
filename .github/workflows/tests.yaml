@@ -1,8 +1,8 @@
-name: Unot tests
+name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
 
 jobs:
