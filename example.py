@@ -142,7 +142,7 @@ def main():
     k1 = 1.0
     k2 = 1.0
 
-    polynomials = [polynomial for polynomial in enumerate_polynomials_sjbrooks(15)]
+    polynomials = [polynomial for polynomial in enumerate_polynomials(7, 7)]
     root_sets = [find_roots(polynomial) for polynomial in polynomials]
     root_sets = [root_set for root_set in root_sets if root_set is not None]
     circles = list(generate_all_circles(root_sets))

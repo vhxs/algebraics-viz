@@ -32,12 +32,12 @@ def draw_circle(circle: Circle):
     glFlush()
 
 def generate_circles(root_set: RootSet) -> Generator[Circle]:
-    color = COLORS[root_set.degree] if root_set.degree < 8 else (1.0, 1.0, 1.0)
+    color = COLORS[root_set.degree-1] if root_set.degree < 8 else (1.0, 1.0, 1.0)
     for root in root_set.roots:
         circle = Circle(
             x_center=root.real,
             y_center=root.imag,
-            radius=(0.5 ** (root_set.length)),
+            radius=(0.5 ** (root_set.length + 1 + root_set.degree)),
             red=color[0],
             green=color[1],
             blue=color[2]
