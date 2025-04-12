@@ -1,5 +1,5 @@
+from collections import defaultdict
 import sys
-from typing import Generator
 import numpy as np
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QHBoxLayout, QVBoxLayout, QGridLayout,
@@ -14,9 +14,17 @@ from algebraics.graphics.models import Circle
 from algebraics.polynomial.models import RootSet
 from algebraics.polynomial.polynomial import enumerate_polynomials, find_roots
 
-def generate_all_circles(root_sets: list[RootSet]) -> Generator[Circle]:
-    for root_set in root_sets:
-        yield from generate_circles(root_set)
+COLORS = {
+    1: [1.0, 0.0, 0.0],
+    2: [0.0, 1.0, 0.0],
+    3: [0.0, 0.0, 1.0],
+    4: [0.7, 0.7, 0.0],
+    5: [1.0, 0.6, 0.0],
+    6: [0.0, 1.0, 1.0],
+    7: [1.0, 0.0, 1.0],
+    8: [0.6, 0.6, 0.6],
+}
+DEFAULT_COLOR = [1.0, 1.0, 1.0]
 
 # Provided draw_circle function that renders one quad using texture coordinates.
 def draw_circle(circle: Circle):
@@ -68,11 +76,21 @@ class GLWidget(QOpenGLWidget):
         polynomials = [polynomial for polynomial in enumerate_polynomials(5, 5)]
         root_sets = [find_roots(polynomial) for polynomial in polynomials]
         root_sets = [root_set for root_set in root_sets if root_set is not None]
-        self.circles = list(generate_all_circles(root_sets))
+        self.circles_by_degree = self.generate_circles_by_degree(root_sets)
+        self.colors_by_degree = COLORS.copy()
+        self.default_color = DEFAULT_COLOR.copy()
         
         # Translation offsets.
-        self.tx = 0.0
-        self.ty = 0.0
+        self.translate_x = 0.0
+        self.translate_y = 0.0
+
+    def generate_circles_by_degree(self, root_sets: list[RootSet]) -> dict[int, list[Circle]]:
+        circles = defaultdict(list)
+        for root_set in root_sets:
+            for circle in generate_circles(root_set):
+                circles[root_set.degree].append(circle)
+
+        return circles
 
     def initializeGL(self):
         glEnable(GL_TEXTURE_2D)
@@ -83,22 +101,24 @@ class GLWidget(QOpenGLWidget):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
         
-        glTranslatef(self.tx, self.ty, 0)
+        glTranslatef(self.translate_x, self.translate_y, 0)
         glScalef(self.zoom, self.zoom, 1.0)
-        
+
         glEnable(GL_BLEND)
         glBlendFunc(GL_ONE, GL_ONE)
         glDisable(GL_DEPTH_TEST)
         glEnable(GL_TEXTURE_2D)
         glBindTexture(GL_TEXTURE_2D, self.texture)
         
-        n = len(self.circles)
-        if n > 0:
-            # Start a single GL_QUADS batch.
-            glBegin(GL_QUADS)
-            for i, circle in enumerate(self.circles):
+        glBegin(GL_QUADS)
+        for degree in self.circles_by_degree.keys():
+            for circle in self.circles_by_degree[degree]:
+                if degree in self.colors_by_degree:
+                    circle.set_color(self.colors_by_degree[degree])
+                else:
+                    circle.set_color(self.default_color)
                 draw_circle(circle)
-            glEnd()
+        glEnd()
     
     def zoom_in(self):
         self.zoom *= 1.1
@@ -108,27 +128,26 @@ class GLWidget(QOpenGLWidget):
         self.zoom /= 1.1
         self.update()
 
-    # Translation methods.
     def move_left(self):
-        self.tx -= 0.1
+        self.translate_x -= 0.1
         self.update()
 
     def move_right(self):
-        self.tx += 0.1
+        self.translate_x += 0.1
         self.update()
 
     def move_up(self):
-        self.ty += 0.1
+        self.translate_y += 0.1
         self.update()
 
     def move_down(self):
-        self.ty -= 0.1
+        self.translate_y -= 0.1
         self.update()
 
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Dynamic Circles with Single GL_QUADS Batch")
+        self.setWindowTitle("Algebraic numbers")
         main_layout = QHBoxLayout()
         
         # Create the GL widget.
@@ -137,17 +156,18 @@ class MainWindow(QWidget):
         # Left control panel.
         control_layout = QVBoxLayout()
         self.color_layout = QVBoxLayout()
-        self.color_buttons = []  # Store color button references.
+        self.color_buttons: dict[int | str, QPushButton] = {}
+        self.degree = len(self.gl_widget.colors_by_degree)
         
-        # Add the initial color button.
-        self.add_color_button()
+        # Add initial color buttons.
+        self.populate_color_buttons()
         
         # Layout for the +/- buttons.
         modify_layout = QHBoxLayout()
         self.minus_btn = QPushButton("-")
         self.minus_btn.clicked.connect(self.remove_color_button)
         self.plus_btn = QPushButton("+")
-        self.plus_btn.clicked.connect(self.add_color_button)
+        self.plus_btn.clicked.connect(self.add_new_color_button)
         modify_layout.addWidget(self.minus_btn)
         modify_layout.addWidget(self.plus_btn)
         
@@ -186,34 +206,45 @@ class MainWindow(QWidget):
         main_layout.addWidget(self.gl_widget, stretch=1)
         self.setLayout(main_layout)
 
-    def add_color_button(self):
-        index = len(self.color_buttons)
-        # Create a new Circle with default white color.
-        btn = QPushButton(f"Degree {index+1}")
+    def populate_color_buttons(self):
+        btn = QPushButton(f"Default")
+        color = self.gl_widget.default_color
+        btn.setStyleSheet(f"background-color: rgb({color[0]*255},{color[1]*255},{color[2]*255});")
+        btn.clicked.connect(lambda _, idx="default": self.pick_color(idx))
+        self.color_buttons["default"] = btn
+        self.color_layout.addWidget(btn)
+
+        for degree, color in self.gl_widget.colors_by_degree.items():
+            btn = QPushButton(f"Degree {degree}")
+            btn.setStyleSheet(f"background-color: rgb({color[0]*255},{color[1]*255},{color[2]*255});")
+            btn.clicked.connect(lambda _, idx=degree: self.pick_color(idx))
+            self.color_buttons[degree] = btn
+            self.color_layout.addWidget(btn)
+
+    def add_new_color_button(self):
+        self.degree += 1
+
+        btn = QPushButton(f"Degree {self.degree}")
         btn.setStyleSheet("background-color: rgb(255,255,255);")
-        btn.clicked.connect(lambda _, idx=index: self.pick_color(idx))
-        self.color_buttons.append(btn)
+        btn.clicked.connect(lambda _, idx=self.degree: self.pick_color(idx))
+        self.color_buttons[self.degree] = btn
         self.color_layout.addWidget(btn)
         self.gl_widget.update()
 
     def remove_color_button(self):
-        if len(self.color_buttons) > 1:
-            btn = self.color_buttons.pop()
+        if self.degree > 0:
+            btn = self.color_buttons.pop(self.degree)
             btn.setParent(None)
-            self.gl_widget.circles.pop()
+            self.degree -= 1
             self.gl_widget.update()
 
-    def pick_color(self, idx):
+    def pick_color(self, degree: int | str):
         color = QColorDialog.getColor()
         if color.isValid():
-            circle = self.gl_widget.circles[idx]
-            # Convert QColor (0-255) to normalized floats (0.0-1.0)
-            circle.red = color.red() / 255.0
-            circle.green = color.green() / 255.0
-            circle.blue = color.blue() / 255.0
-            self.color_buttons[idx].setStyleSheet(
-                f"background-color: rgb({color.red()}, {color.green()}, {color.blue()});"
-            )
+            self.color_buttons[degree].setStyleSheet(
+                    f"background-color: rgb({color.red()}, {color.green()}, {color.blue()});"
+                )
+            self.gl_widget.colors_by_degree[degree] = [color.red() / 255., color.green() / 255., color.blue() / 255.]
             self.gl_widget.update()
 
     def zoom_in(self):
