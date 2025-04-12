@@ -73,7 +73,7 @@ class GLWidget(QOpenGLWidget):
         self.texture = None
 
         # List of Circle objects.
-        polynomials = [polynomial for polynomial in enumerate_polynomials(5, 5)]
+        polynomials = [polynomial for polynomial in enumerate_polynomials(6, 6)]
         root_sets = [find_roots(polynomial) for polynomial in polynomials]
         root_sets = [root_set for root_set in root_sets if root_set is not None]
         self.circles_by_degree = self.generate_circles_by_degree(root_sets)
@@ -235,6 +235,8 @@ class MainWindow(QWidget):
         if self.degree > 0:
             btn = self.color_buttons.pop(self.degree)
             btn.setParent(None)
+
+            self.gl_widget.colors_by_degree.pop(self.degree)
             self.degree -= 1
             self.gl_widget.update()
 
@@ -244,7 +246,10 @@ class MainWindow(QWidget):
             self.color_buttons[degree].setStyleSheet(
                     f"background-color: rgb({color.red()}, {color.green()}, {color.blue()});"
                 )
-            self.gl_widget.colors_by_degree[degree] = [color.red() / 255., color.green() / 255., color.blue() / 255.]
+            if isinstance(degree, int):
+                self.gl_widget.colors_by_degree[degree] = [color.red() / 255., color.green() / 255., color.blue() / 255.]
+            else:
+                self.gl_widget.default_color = [color.red() / 255., color.green() / 255., color.blue() / 255.]
             self.gl_widget.update()
 
     def zoom_in(self):
