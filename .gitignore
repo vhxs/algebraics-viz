@@ -1,5 +1,4 @@
 __pycache__
-example.py
 .venv
 # Ignore dynaconf secret files
 .secrets.*
