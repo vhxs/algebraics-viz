@@ -12,59 +12,6 @@ import time
 import math
 import numpy as np
 
-# ---------------------------
-# Circle Class for Parameters
-# ---------------------------
-# class Circle(BaseModel):
-#     x_center: float
-#     y_center: float
-#     radius: float
-#     red: float
-#     green: float
-#     blue: float
-
-# ---------------------------
-# Circle Generation (generate_circles)
-# ---------------------------
-# def generate_circles(dummy):
-#     num_circles = 150  # Number of circles to generate
-#     circles = []
-#     for i in range(num_circles):
-#         angle = i * 0.3
-#         dist = i * 0.5
-#         x_center = math.cos(angle) * dist
-#         y_center = math.sin(angle) * dist
-#         # Base radius similar to original: 0.125 * (0.5 ** (i mod 3))
-#         base_radius = 0.125 * (0.5 ** (i % 3))
-#         mod = (i % 8) + 1
-#         if mod == 1:
-#             red, green, blue = 1.0, 0.0, 0.0
-#         elif mod == 2:
-#             red, green, blue = 0.0, 1.0, 0.0
-#         elif mod == 3:
-#             red, green, blue = 0.0, 0.0, 1.0
-#         elif mod == 4:
-#             red, green, blue = 0.7, 0.7, 0.0
-#         elif mod == 5:
-#             red, green, blue = 1.0, 0.6, 0.0
-#         elif mod == 6:
-#             red, green, blue = 0.0, 1.0, 1.0
-#         elif mod == 7:
-#             red, green, blue = 1.0, 0.0, 1.0
-#         elif mod == 8:
-#             red, green, blue = 0.6, 0.6, 0.6
-
-#         circle = Circle(
-#             x_center=x_center,
-#             y_center=y_center,
-#             radius=base_radius,
-#             red=red,
-#             green=green,
-#             blue=blue
-#         )
-#         circles.append(circle)
-#     return circles
-
 def generate_all_circles(root_sets: list[RootSet]) -> Generator[Circle]:
     for root_set in root_sets:
         yield from generate_circles(root_set)

@@ -17,20 +17,6 @@ COLORS = [
     [0.6, 0.6, 0.6],
 ]
 
-
-def draw_circle(circle: Circle):
-    glColor3f(circle.red, circle.green, circle.blue)
-    glBegin(GL_TRIANGLE_FAN)
-    num_segments = 100
-    glVertex2f(circle.x_center, circle.y_center)
-    for i in range(num_segments + 1):
-        angle = 2.0 * math.pi * i / num_segments
-        x = circle.x_center + circle.radius * math.cos(angle)
-        y = circle.y_center + circle.radius * math.sin(angle)
-        glVertex2f(x, y)
-    glEnd()
-    glFlush()
-
 def generate_circles(root_set: RootSet) -> Generator[Circle]:
     color = COLORS[root_set.degree-1] if root_set.degree < 8 else (1.0, 1.0, 1.0)
     for root in root_set.roots:
