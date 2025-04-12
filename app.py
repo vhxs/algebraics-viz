@@ -1,13 +1,19 @@
-from collections import defaultdict
 import sys
+from collections import defaultdict
+
 import numpy as np
-from PyQt6.QtWidgets import (
-    QApplication, QWidget, QHBoxLayout, QVBoxLayout, QGridLayout,
-    QPushButton, QColorDialog
-)
-from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from OpenGL.GL import *
 from OpenGL.GLU import *
+from PyQt6.QtOpenGLWidgets import QOpenGLWidget
+from PyQt6.QtWidgets import (
+    QApplication,
+    QColorDialog,
+    QGridLayout,
+    QHBoxLayout,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 from algebraics.graphics.circle import generate_circles
 from algebraics.graphics.models import Circle

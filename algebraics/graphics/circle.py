@@ -1,6 +1,5 @@
 from typing import Generator
 
-
 from algebraics.graphics.models import Circle
 from algebraics.polynomial.models import RootSet
 
