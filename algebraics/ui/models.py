@@ -9,7 +9,7 @@ class Circle(BaseModel):
     green: float = 1.0
     blue: float = 1.0
 
-    def set_color(self, color: list[float]):
+    def set_color(self, color: list[float] | tuple[float, float, float]):
         if len(color) != 3:
             raise ValueError("Incorrect number of elements in color vector")
         
