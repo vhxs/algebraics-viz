@@ -13,7 +13,7 @@ Here's a screenshot of the application:
 
 ## Running the application
 
-This project's dependencies are managed by [uv](https://github.com/astral-sh/uv), so if you'll need to install this first. Once installed, run:
+This project's dependencies are managed by [uv](https://docs.astral.sh/uv/getting-started/installation/), so if you'll need to install this first. Once installed, run:
 
 ```uv venv && uv sync```
 
