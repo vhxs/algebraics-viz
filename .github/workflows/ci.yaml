@@ -3,10 +3,12 @@ name: CI
 on:
   push:
     branches: [main]
+    tags:
+      - "v*"
   pull_request:
 
 jobs:
-  test:
+  build-macos:
     runs-on: ubuntu-latest
 
     steps:
@@ -37,3 +39,18 @@ jobs:
 
       - name: Run tests
         run: uv run pytest
+
+      - name: Build app
+        run: |
+          uv run pyinstaller --onefile --windowed app.py
+          mv dist/app dist/Algebraics
+          cd dist
+          zip Algebraics.zip Algebraics
+          cd ..
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/Algebraics.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
