@@ -15,6 +15,7 @@ def enumerate_partitions(n: int, length: int) -> Generator[list[int]]:
 
     yield from enumerate_partitions_recursive(n, [])
 
+
 def generate_signs(partition: list[int]) -> Generator[list[int]]:
     signs = []
     for number in partition:

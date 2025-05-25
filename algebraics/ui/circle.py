@@ -19,10 +19,22 @@ def generate_circles(root_set: RootSet) -> Generator[Circle]:
 def draw_circle(circle: Circle, radius_scale=10.0):
     glColor3f(circle.red, circle.green, circle.blue)
     glTexCoord2f(0, 0)
-    glVertex2f(circle.x_center - circle.radius*radius_scale, circle.y_center - circle.radius*radius_scale)
+    glVertex2f(
+        circle.x_center - circle.radius * radius_scale,
+        circle.y_center - circle.radius * radius_scale,
+    )
     glTexCoord2f(1, 0)
-    glVertex2f(circle.x_center + circle.radius*radius_scale, circle.y_center - circle.radius*radius_scale)
+    glVertex2f(
+        circle.x_center + circle.radius * radius_scale,
+        circle.y_center - circle.radius * radius_scale,
+    )
     glTexCoord2f(1, 1)
-    glVertex2f(circle.x_center + circle.radius*radius_scale, circle.y_center + circle.radius*radius_scale)
+    glVertex2f(
+        circle.x_center + circle.radius * radius_scale,
+        circle.y_center + circle.radius * radius_scale,
+    )
     glTexCoord2f(0, 1)
-    glVertex2f(circle.x_center - circle.radius*radius_scale, circle.y_center + circle.radius*radius_scale)
+    glVertex2f(
+        circle.x_center - circle.radius * radius_scale,
+        circle.y_center + circle.radius * radius_scale,
+    )

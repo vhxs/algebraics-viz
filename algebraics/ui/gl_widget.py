@@ -40,7 +40,9 @@ class GLWidget(QOpenGLWidget):
         self.translate_y = 0.0
 
     def generate_circles_by_degree(self, max_length: int, max_degree: int):
-        polynomials = [polynomial for polynomial in enumerate_polynomials(max_length, max_degree)]
+        polynomials = [
+            polynomial for polynomial in enumerate_polynomials(max_length, max_degree)
+        ]
         root_sets: list[RootSet] = []
         for polynomial in polynomials:
             root_set = find_roots(polynomial)
@@ -51,8 +53,10 @@ class GLWidget(QOpenGLWidget):
         for root_set in root_sets:
             for circle in generate_circles(root_set):
                 self.circles_by_degree[root_set.degree].append(circle)
-        
-        self.colors_by_degree = {k: v for k, v in GLWidget.COLORS.copy().items() if k <= max_degree}
+
+        self.colors_by_degree = {
+            k: v for k, v in GLWidget.COLORS.copy().items() if k <= max_degree
+        }
 
         self.max_degree = max_degree
         self.max_length = max_length
@@ -67,19 +71,21 @@ class GLWidget(QOpenGLWidget):
         height = texture_size
 
         x_coords, y_coords = np.meshgrid(
-            np.arange(width),
-            np.arange(height - 1, -1, -1),
-            indexing='xy'
+            np.arange(width), np.arange(height - 1, -1, -1), indexing="xy"
         )
 
         texture_center = texture_size / 2.0
 
-        intensity = ((texture_size / 2.0) ** 2) / (1 + (x_coords - texture_center)**2 + (y_coords - texture_center)**2)
+        intensity = ((texture_size / 2.0) ** 2) / (
+            1 + (x_coords - texture_center) ** 2 + (y_coords - texture_center) ** 2
+        )
         intensity = np.minimum(255, intensity).astype(np.uint8)
 
         texture_data = np.stack((intensity, intensity, intensity), axis=-1)
 
-        gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, GL_RGB, GL_UNSIGNED_BYTE, texture_data)
+        gluBuild2DMipmaps(
+            GL_TEXTURE_2D, 3, width, height, GL_RGB, GL_UNSIGNED_BYTE, texture_data
+        )
         return texture_id
 
     def initializeGL(self):

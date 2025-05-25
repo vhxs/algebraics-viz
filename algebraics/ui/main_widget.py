@@ -45,11 +45,13 @@ class MainWindow(QWidget):
         v.addWidget(self._create_generate_button())
         v.addStretch()
         return container
-    
+
     def _create_default_color_button(self):
         btn = QPushButton(f"Default")
         color = self.gl_widget.default_color
-        btn.setStyleSheet(f"background-color: rgb({color[0]*255},{color[1]*255},{color[2]*255});")
+        btn.setStyleSheet(
+            f"background-color: rgb({color[0] * 255},{color[1] * 255},{color[2] * 255});"
+        )
         btn.clicked.connect(lambda _, idx="default": self._select_color(idx))
         self.color_buttons["default"] = btn
         self.color_layout.addWidget(btn)
@@ -57,13 +59,15 @@ class MainWindow(QWidget):
     def _create_color_controls(self) -> QVBoxLayout:
         self.color_layout = QVBoxLayout()
         self.color_buttons = {}
-        
+
         self._create_default_color_button()
 
         for degree in range(1, self.max_degree + 1):
             color = self.gl_widget.colors_by_degree[degree]
             btn = QPushButton(f"Degree {degree}")
-            btn.setStyleSheet(f"background-color: rgb({color[0]*255},{color[1]*255},{color[2]*255});")
+            btn.setStyleSheet(
+                f"background-color: rgb({color[0] * 255},{color[1] * 255},{color[2] * 255});"
+            )
             btn.clicked.connect(lambda _, idx=degree: self._select_color(idx))
             self.color_buttons[degree] = btn
             self.color_layout.addWidget(btn)
@@ -96,7 +100,7 @@ class MainWindow(QWidget):
             "Right": self.move_right,
             "Down": self.move_down,
         }
-        positions = {"Up": (0,1), "Left": (1,0), "Right": (1,2), "Down": (2,1)}
+        positions = {"Up": (0, 1), "Left": (1, 0), "Right": (1, 2), "Down": (2, 1)}
         grid = QGridLayout()
         for name, slot in directions.items():
             btn = QPushButton(name)
@@ -110,19 +114,23 @@ class MainWindow(QWidget):
         self.degree_spin.setValue(self.gl_widget.max_degree)
         self.length_spin = QSpinBox()
         self.length_spin.setValue(self.gl_widget.max_length)
-        for label, widget in [("Degree", self.degree_spin), ("Length", self.length_spin)]:
+        for label, widget in [
+            ("Degree", self.degree_spin),
+            ("Length", self.length_spin),
+        ]:
             h.addWidget(QLabel(label))
             h.addWidget(widget)
         return h
 
     def _create_generate_button(self) -> QPushButton:
         btn = QPushButton("Generate")
-        btn.clicked.connect(lambda: self._update_circles(
-            self.length_spin.value(),
-            self.degree_spin.value()
-        ))
+        btn.clicked.connect(
+            lambda: self._update_circles(
+                self.length_spin.value(), self.degree_spin.value()
+            )
+        )
         return btn
-    
+
     def _create_separator(self) -> QFrame:
         separator = QFrame()
         separator.setFrameShape(QFrame.Shape.HLine)
@@ -140,7 +148,9 @@ class MainWindow(QWidget):
         for degree in range(1, self.max_degree + 1):
             color = self.gl_widget.colors_by_degree[degree]
             btn = QPushButton(f"Degree {degree}")
-            btn.setStyleSheet(f"background-color: rgb({color[0]*255},{color[1]*255},{color[2]*255});")
+            btn.setStyleSheet(
+                f"background-color: rgb({color[0] * 255},{color[1] * 255},{color[2] * 255});"
+            )
             btn.clicked.connect(lambda _, idx=degree: self._select_color(idx))
             self.color_buttons[degree] = btn
             self.color_layout.addWidget(btn)
@@ -157,7 +167,7 @@ class MainWindow(QWidget):
 
         if self.max_degree >= 1:
             self.minus_btn.setDisabled(False)
-        
+
         if self.max_degree >= self.gl_widget.max_degree:
             self.plus_btn.setDisabled(True)
 
@@ -189,12 +199,20 @@ class MainWindow(QWidget):
         color = QColorDialog.getColor()
         if color.isValid():
             self.color_buttons[degree].setStyleSheet(
-                    f"background-color: rgb({color.red()}, {color.green()}, {color.blue()});"
-                )
+                f"background-color: rgb({color.red()}, {color.green()}, {color.blue()});"
+            )
             if isinstance(degree, int):
-                self.gl_widget.colors_by_degree[degree] = [color.red() / 255., color.green() / 255., color.blue() / 255.]
+                self.gl_widget.colors_by_degree[degree] = [
+                    color.red() / 255.0,
+                    color.green() / 255.0,
+                    color.blue() / 255.0,
+                ]
             else:
-                self.gl_widget.default_color = [color.red() / 255., color.green() / 255., color.blue() / 255.]
+                self.gl_widget.default_color = [
+                    color.red() / 255.0,
+                    color.green() / 255.0,
+                    color.blue() / 255.0,
+                ]
             self.gl_widget.update()
 
     def _create_radius_slider(self):
