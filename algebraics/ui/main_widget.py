@@ -1,16 +1,16 @@
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QColorDialog,
+    QFrame,
     QGridLayout,
     QHBoxLayout,
     QLabel,
     QPushButton,
+    QSlider,
     QSpinBox,
     QVBoxLayout,
     QWidget,
-    QSlider,
-    QFrame
 )
-from PyQt6.QtCore import Qt
 
 from algebraics.ui.gl_widget import GLWidget
 
