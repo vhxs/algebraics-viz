@@ -12,7 +12,7 @@ class Circle(BaseModel):
     def set_color(self, color: list[float] | tuple[float, float, float]):
         if len(color) != 3:
             raise ValueError("Incorrect number of elements in color vector")
-        
+
         self.red = color[0]
         self.green = color[1]
         self.blue = color[2]
