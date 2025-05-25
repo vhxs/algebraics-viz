@@ -41,7 +41,7 @@ jobs:
       - name: Build app
         run: |
           uv run pyinstaller --onefile --windowed app.py
-          mv dist/main dist/Algebraics
+          mv dist/app dist/Algebraics
           cd dist
           zip Algebraics.zip Algebraics
           cd ..
