@@ -1,15 +1,13 @@
-from algebraics.polynomial.models import RootSet
-from algebraics.polynomial.polynomial import enumerate_polynomials, find_roots
-from algebraics.ui.circle import draw_circle, generate_circles
-from algebraics.ui.models import Circle
+from collections import defaultdict
 
 import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 
-
-from collections import defaultdict
+from algebraics.polynomial.models import RootSet
+from algebraics.polynomial.polynomial import enumerate_polynomials, find_roots
+from algebraics.ui.circle import draw_circle, generate_circles
 
 
 class GLWidget(QOpenGLWidget):
@@ -29,28 +27,35 @@ class GLWidget(QOpenGLWidget):
     def __init__(self):
         super().__init__()
         self.zoom = 1.0
+        self.radius_scale = 10.0
         self.texture = None
 
         self.max_degree = 5
         self.max_length = 5
 
-        polynomials = [polynomial for polynomial in enumerate_polynomials(self.max_length, self.max_degree)]
-        root_sets = [find_roots(polynomial) for polynomial in polynomials]
-        root_sets = [root_set for root_set in root_sets if root_set is not None]
-        self.circles_by_degree = self.generate_circles_by_degree(root_sets)
-        self.colors_by_degree = {k: v for k, v in GLWidget.COLORS.copy().items() if k <= self.max_degree}
+        self.generate_circles_by_degree(self.max_length, self.max_degree)
         self.default_color = GLWidget.DEFAULT_COLOR.copy()
 
         self.translate_x = 0.0
         self.translate_y = 0.0
 
-    def generate_circles_by_degree(self, root_sets: list[RootSet]) -> dict[int, list[Circle]]:
-        circles = defaultdict(list)
+    def generate_circles_by_degree(self, max_length: int, max_degree: int):
+        polynomials = [polynomial for polynomial in enumerate_polynomials(max_length, max_degree)]
+        root_sets: list[RootSet] = []
+        for polynomial in polynomials:
+            root_set = find_roots(polynomial)
+            if root_set:
+                root_sets.append(root_set)
+
+        self.circles_by_degree = defaultdict(list)
         for root_set in root_sets:
             for circle in generate_circles(root_set):
-                circles[root_set.degree].append(circle)
+                self.circles_by_degree[root_set.degree].append(circle)
+        
+        self.colors_by_degree = {k: v for k, v in GLWidget.COLORS.copy().items() if k <= max_degree}
 
-        return circles
+        self.max_degree = max_degree
+        self.max_length = max_length
 
     def create_texture(self, texture_size: int) -> int:
         texture_id = glGenTextures(1)
@@ -102,7 +107,7 @@ class GLWidget(QOpenGLWidget):
                     circle.set_color(self.colors_by_degree[degree])
                 else:
                     circle.set_color(self.default_color)
-                draw_circle(circle)
+                draw_circle(circle, self.radius_scale)
         glEnd()
 
     def zoom_in(self):
@@ -127,4 +132,8 @@ class GLWidget(QOpenGLWidget):
 
     def move_down(self):
         self.translate_y -= 0.1
+        self.update()
+
+    def update_radius_scale(self, radius_scale: float):
+        self.radius_scale = radius_scale
         self.update()

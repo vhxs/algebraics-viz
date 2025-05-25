@@ -6,7 +6,6 @@ from PyQt6.QtWidgets import (
 
 from algebraics.ui.main_widget import MainWindow
 
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
