@@ -3,7 +3,9 @@ from typing import Generator
 
 
 def enumerate_partitions(n: int, length: int) -> Generator[list[int]]:
-    def enumerate_partitions_recursive(n, current_partition) -> Generator[list[int]]:
+    def enumerate_partitions_recursive(
+        n: int, current_partition: list[int]
+    ) -> Generator[list[int]]:
         if len(current_partition) == length:
             if n == 0:
                 yield list(current_partition)
